@@ -1,6 +1,6 @@
 package com.mobilebuttes.fortyk;
 
-class FKScenario {	
+public class FKScenario {	
 	private FKScenarioType type = FKScenarioType.SHOOTING;
 	
 	private int bs = 4;

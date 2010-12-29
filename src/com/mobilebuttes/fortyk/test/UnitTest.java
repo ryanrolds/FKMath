@@ -1,4 +1,8 @@
-package com.mobilebuttes.fortyk;
+package com.mobilebuttes.fortyk.test;
+
+import com.mobilebuttes.fortyk.FKMath;
+import com.mobilebuttes.fortyk.FKScenario;
+import com.mobilebuttes.fortyk.OutOfAcceptableRange;
 
 class UnitTest {
 	public static void main(String[] args) throws OutOfAcceptableRange {
