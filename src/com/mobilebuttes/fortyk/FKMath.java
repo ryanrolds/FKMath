@@ -1,4 +1,4 @@
-package com.mobilebuttes;
+package com.mobilebuttes.fortyk;
 
 public class FKMath {
 	final private double ANYONESIDE = (1.0 / 6);
@@ -22,26 +22,26 @@ public class FKMath {
 	
 	public double getProbability(FKScenario s) {
 		double prob = 1.0;
-		double toHit = getToHit(s.bs,s.twl,s.onHitSuccessRR,s.onHitFailureRR);
-		double toWound = getToWound(s.strength,s.toughness,s.onWoundSuccessRR,s.onWoundFailureRR,s.rending,s.sniper);
-		double saveChance = getArmorSave(s.armor,s.ap,s.onSaveSuccessRR,s.onSaveFailureRR);
-		double invChance = getInvSave(s.inv,s.onSaveSuccessRR,s.onSaveFailureRR);
-		double fnpChance = getFNP(s.fnp,s.ap);
+		double toHit = calcToHit(s.getBS(),s.isTWL(),s.isOnHitSuccessRR(),s.isOnHitFailureRR());
+		double toWound = calcToWound(s.getStrength(),s.getToughness(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR(),s.isRending(),s.isSniper());
+		double saveChance = calcArmorSave(s.getArmor(),s.getAP(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR());
+		double invChance = calcInvSave(s.getInv(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR());
+		double fnpChance = calcFNP(s.isFNP(),s.getAP());
 		
 		prob = toHit;
 		prob = prob * toWound;
 		prob = prob * ((saveChance <= invChance) ? saveChance : invChance);
 		prob = prob * fnpChance;
 		
-		if(s.rending || s.sniper) prob = prob + (toHit * ANYONESIDE * invChance);
+		if(s.isRending() || s.isSniper()) prob = prob + (toHit * ANYONESIDE * invChance);
 		
 		
-		System.out.println("To Hit("+s.bs+"): "+toHit);
-		System.out.println("To Wound("+s.strength+","+s.toughness+"): "+toWound);
-		System.out.println("Rending: "+s.rending);
-		System.out.println("Save("+s.armor+","+s.ap+"): "+saveChance);
-		System.out.println("Inv("+s.inv+"): "+invChance);
-		System.out.println("FNP("+s.fnp+"): "+fnpChance);
+		System.out.println("To Hit("+s.getBS()+"): "+toHit);
+		System.out.println("To Wound("+s.getStrength()+","+s.getToughness()+"): "+toWound);
+		System.out.println("Rending: "+s.isRending());
+		System.out.println("Save("+s.getArmor()+","+s.getAP()+"): "+saveChance);
+		System.out.println("Inv("+s.getInv()+"): "+invChance);
+		System.out.println("FNP("+s.isFNP()+"): "+fnpChance);
 		System.out.println("-----------------");	
 		
 		return prob;
@@ -52,14 +52,14 @@ public class FKMath {
 //		return wounds;
 //	}
 
-	private double getToHit(int bs,boolean twinLinked,boolean onFailureRR,boolean onSuccessRR) {
+	private double calcToHit(int bs,boolean twinLinked,boolean onFailureRR,boolean onSuccessRR) {
 		double prob = (DICEINVERSION - (TOHITCONVERSION - bs)) * ANYONESIDE;	
     	if(twinLinked) prob = (ONE - Math.pow((ONE - prob),FACTORTWO));
     	
     	return factorRerolls(prob,onFailureRR,onSuccessRR);
 	}
 
-	private double getToWound(int strength,int toughness,boolean onFailureRR,boolean onSuccessRR,boolean rending,boolean sniper) {
+	private double calcToWound(int strength,int toughness,boolean onFailureRR,boolean onSuccessRR,boolean rending,boolean sniper) {
 		int diff = woundTable[strength-1][toughness-1];
 		if(rending) diff++;
 		if(sniper) diff = 5;		
@@ -73,21 +73,21 @@ public class FKMath {
 		return factorRerolls(prob,onFailureRR,onSuccessRR);
 	}
 
-	private double getArmorSave(int armor,int weaponAP,boolean onFailureRR,boolean onSuccessRR) {
+	private double calcArmorSave(int armor,int weaponAP,boolean onFailureRR,boolean onSuccessRR) {
 		if(weaponAP <= armor && weaponAP != -1) return ONE;
 
 		double prob = (DICEINVERSION - armor) * ANYONESIDE;			
 		return factorRerolls(prob,onFailureRR,onSuccessRR);
 	}
 	
-	private double getInvSave(int inv,boolean onFailureRR,boolean onSuccessRR) {
+	private double calcInvSave(int inv,boolean onFailureRR,boolean onSuccessRR) {
 		if(inv == -1) return ONE;
 		
 		double prob = (DICEINVERSION - inv) * ANYONESIDE;	
 		return factorRerolls(prob,onFailureRR,onSuccessRR);
 	}
 	
-	private double getFNP(boolean fnp,int weaponAP) {
+	private double calcFNP(boolean fnp,int weaponAP) {
 		if(fnp == false || (weaponAP < 3 && weaponAP != -1)) return ONE;		
 		return 0.5;		
 	}
