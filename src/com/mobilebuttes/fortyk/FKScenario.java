@@ -2,20 +2,29 @@ package com.mobilebuttes.fortyk;
 
 public class FKScenario {	
 	private FKScenarioType type = FKScenarioType.SHOOTING;
+	private FKScenarioTarget target = FKScenarioTarget.UNARMORED;
 	
 	private int bs = 4;
 	private int strength = 4;
+	private int ap = 5;
+	private int attacks = 1;
+	
 	private int toughness = 4;
 	private int armor = 4;
-	private int ap = 5;
-	private int inv = -1;	
-		
-	private boolean fnp = false;	
+	private int inv = -1;
 	
-	private boolean rending = false; // Not in vehicle or assault area
-	private boolean melta = false; // New
-	private boolean twl = false; 
+	private boolean rending = false;
+	private boolean sniperSetRending = false;
 	private boolean sniper = false;
+	private boolean twl = false; 	
+	private boolean ordnance = false;
+	private boolean melta = false;
+	private boolean lance = false;
+	private boolean powerFist = false;
+	
+	private boolean fnp = false;	
+	private int cover = 0;
+	private boolean openTopped = false; // TODO - +1 to dmg roll
 	
 	private boolean onHitFailureRR = false;
 	private boolean onHitSuccessRR = false;
@@ -26,11 +35,20 @@ public class FKScenario {
 	private boolean onInvFailureRR = false;
 	private boolean onInvSuccessRR = false;
 	
+	//Results
+	private double probability = 1.0;
+	
 	public FKScenarioType getType() {
 		return type;
 	}
 	public void setType(FKScenarioType type) {
 		this.type = type;
+	}
+	public FKScenarioTarget getTarget() {
+		return target;
+	}
+	public void setTarget(FKScenarioTarget target) {
+		this.target = target;
 	}
 	public int getBS() {
 		return bs;
@@ -42,6 +60,8 @@ public class FKScenario {
 			throw new OutOfAcceptableRange("Ballistic skill out of range");
 	}
 	public int getStrength() {
+		if(sniper && target == FKScenarioTarget.ARMORED) return 3; // BRB p31.2.9 - Sniper 
+		
 		return strength;
 	}
 	public void setStrength(int strength) throws OutOfAcceptableRange {
@@ -60,6 +80,9 @@ public class FKScenario {
 			throw new OutOfAcceptableRange("Toughness out of range");
 	}
 	public int getArmor() {
+		if(lance && target == FKScenarioTarget.ARMORED && armor > 12) // BRB p32.2.3 - LANCE
+			return 12;
+			
 		return armor;
 	}
 	public void setArmor(int armor) throws OutOfAcceptableRange {
@@ -77,6 +100,12 @@ public class FKScenario {
 		else 
 			throw new OutOfAcceptableRange("AP out of range");
 	}
+	public int getAttacks() {
+		return attacks;
+	}
+	public void setAttacks(int attacks) {
+		this.attacks = attacks;
+	}
 	public int getInv() {
 		return inv;
 	}
@@ -84,7 +113,7 @@ public class FKScenario {
 		if(inv > -1 && inv < 7)
 			this.inv = inv;
 		else 
-			throw new OutOfAcceptableRange("AP out of range");
+			throw new OutOfAcceptableRange("Inv out of range");
 	}
 	public boolean isFNP() {
 		return fnp;
@@ -96,6 +125,13 @@ public class FKScenario {
 		return rending;
 	}
 	public void setRending(boolean rending) {
+		if(rending && sniperSetRending)
+			sniperSetRending = false;
+		
+		if(!rending && sniper) 
+			sniperSetRending = true;
+			rending = true;
+		
 		this.rending = rending;
 	}
 	public boolean isMelta() {
@@ -114,7 +150,43 @@ public class FKScenario {
 		return sniper;
 	}
 	public void setSniper(boolean sniper) {
+		if(sniper && !rending)
+			rending = true;
+			sniperSetRending = true;
+	
+		if(!sniper && sniperSetRending) {
+			rending = false;
+			sniperSetRending = false;
+		}
+		
 		this.sniper = sniper;
+	}
+	public int getCover() {
+		return cover;
+	}
+	public void setCover(int cover) throws OutOfAcceptableRange {
+		if(cover > -1 && cover < 7)	
+			this.cover = cover;
+		else 
+			throw new OutOfAcceptableRange("Cover out of range");
+	}
+	public boolean isOpenTopped() {
+		return openTopped;
+	}
+	public void setOpenTopped(boolean openTopped) {
+		this.openTopped = openTopped;
+	}
+	public boolean isOrdnance() {
+		return ordnance;
+	}
+	public void setOrdnance(boolean ordnance) {
+		this.ordnance = ordnance;
+	}
+	public boolean isLance() {
+		return lance;
+	}
+	public void setLance(boolean lance) {
+		this.lance = lance;
 	}
 	public boolean isOnHitFailureRR() {
 		return onHitFailureRR;
@@ -164,5 +236,12 @@ public class FKScenario {
 	public void setOnInvSuccessRR(boolean onInvSuccessRR) {
 		this.onInvSuccessRR = onInvSuccessRR;
 	}	
+	
+	public double getProbability() {
+		return probability;
+	}
+	public void setProbability(double probability) {
+		this.probability = probability;
+	}
 }
 
