@@ -46,6 +46,19 @@ public class FKMath {
 			{11,11}  // 6
 		};
 	
+	final private int[][] assaultToHit = {
+			{4,4,5,5,5,5,5,5,5,5},
+			{3,4,4,4,5,5,5,5,5,5},
+			{3,3,4,4,4,4,5,5,5,5},
+			{3,3,3,4,4,4,4,4,5,5},
+			{3,3,3,3,4,4,4,4,4,4},
+			{3,3,3,3,3,4,4,4,4,4},
+			{3,3,3,3,3,3,4,4,4,4},
+			{3,3,3,3,3,3,3,4,4,4},
+			{3,3,3,3,3,3,3,3,4,4},
+			{3,3,3,3,3,3,3,3,3,4}
+		};
+	
 	public void processScenario(FKScenario s) {
 		double prob = 1.0;
 		
@@ -54,10 +67,17 @@ public class FKMath {
 			
 			if(s.getTarget() == FKScenarioTarget.UNARMORED) {
 				double toWound = calcToWound(s.getStrength(),s.getToughness(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR(),s.isRending(),s.isSniper());
-				double saveChance = calcArmorSave(s.getArmor(),s.getAP(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR());
+				double saveChance = calcArmorSave(s.getArmor(),s.getAP(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR(),s.isArmorIgnored());
 				double coverChance = calcCover(s.getCover());
 				double invChance = calcInvSave(s.getInv(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR());
-				double fnpChance = calcFNP(s.isFNP(),s.getAP());
+				double fnpChance = calcFNP(s.isFNP(),s.getAP(),s.isArmorIgnored());
+				
+				System.out.println("Hit: "+hitChance);
+				System.out.println("Wound: "+toWound);
+				System.out.println("Save: "+saveChance);
+				System.out.println("Cover: "+coverChance);
+				System.out.println("Inv: "+invChance);
+				System.out.println("FNP: "+fnpChance);
 				
 				double bestSave = saveChance;
 				if(bestSave > coverChance) bestSave = coverChance;
@@ -68,16 +88,44 @@ public class FKMath {
 				prob = prob * bestSave;
 				prob = prob * fnpChance;
 				
-				if(s.isRending()) prob = prob + (hitChance * ANYONESIDE * invChance);			
-			} else { // TODO Shooting Armored Target				
+				if(s.isRending()) prob = prob + (hitChance * ANYONESIDE * ((coverChance < invChance) ? coverChance : invChance));			
+			} else {			
 				double glanceChance = calcToGlance(s.getStrength(),s.getArmor(),s.isMelta(),s.isOrdnance(),s.isRending());
 				double penChance = calcToPen(s.getStrength(),s.getArmor(),s.isMelta(),s.isOrdnance(),s.isRending());
 				double coverChance = calcCover(s.getCover());
 			
 				prob = hitChance * (glanceChance + penChance) * coverChance;				
 			}			
-		} else  {
-			// TODO Close Combat
+		} else  { // TODO Close Combat
+			if(s.getTarget() == FKScenarioTarget.UNARMORED) {
+				double hitChance = calcToAssaultHit(s.getAWS(),s.getTWS(),s.isOnHitSuccessRR(),s.isOnHitFailureRR());
+				double toWound = calcToAssaultWound(s.getStrength(),s.getToughness(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR(),s.isRending(),s.isWitchBlade(),s.getPoisoned());				
+				double saveChance = calcArmorSave(s.getArmor(),s.getAP(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR(),s.isArmorIgnored());
+				double coverChance = calcCover(s.getCover());
+				double invChance = calcInvSave(s.getInv(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR());
+				double fnpChance = calcFNP(s.isFNP(),s.getAP(),s.isArmorIgnored());
+				
+				System.out.println("Hit: "+hitChance);
+				System.out.println("Wound: "+toWound);
+				System.out.println("Save: "+saveChance);
+				System.out.println("Cover: "+coverChance);
+				System.out.println("Inv: "+invChance);
+				System.out.println("FNP: "+fnpChance);
+				
+				double bestSave = saveChance;
+				if(bestSave > coverChance) bestSave = coverChance;
+				if(bestSave > invChance) bestSave = invChance;
+				
+				prob = hitChance;
+				prob = prob * toWound;
+				prob = prob * bestSave;
+				prob = prob * fnpChance;
+				
+				if(s.isRending()) prob = prob + (hitChance * ANYONESIDE * ((coverChance < invChance) ? coverChance : invChance));
+			} else {
+				
+				
+			}
 		}
 		
 		s.setProbability(prob);
@@ -94,6 +142,13 @@ public class FKMath {
     	
     	return factorRerolls(prob,onFailureRR,onSuccessRR);
 	}
+	
+	private double calcToAssaultHit(int aWS,int tWS,boolean onFailureRR,boolean onSuccessRR) {
+		int needToHit = assaultToHit[aWS-1][tWS-1];
+		double prob = (DICEINVERSION - needToHit) * ANYONESIDE;
+		
+    	return factorRerolls(prob,onFailureRR,onSuccessRR);
+	}
 
 	private double calcToWound(int strength,int toughness,boolean onFailureRR,boolean onSuccessRR,boolean rending,boolean sniper) {
 		int diff = woundTable[strength-1][toughness-1];
@@ -108,29 +163,45 @@ public class FKMath {
 		
 		return factorRerolls(prob,onFailureRR,onSuccessRR);
 	}
+	
+	//s.getStrength(),s.getToughness(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR(),s.isRending(),s.isPowerWeapon(),s.isWitchBlade(),s.getPoisoned()
+	private double calcToAssaultWound(int strength,int toughness,boolean onFailureRR,boolean onSuccessRR,boolean rending, boolean witchBlade, int poisoned) {
+		int diff = woundTable[strength-1][toughness-1];
+		if(rending) diff++;		
+		if(poisoned > 0) diff = poisoned;
+		if(witchBlade) diff = 2;
+		
+		double prob;
+		if(diff == -1) 
+			prob = ZERO;
+		else 
+			prob = (DICEINVERSION - diff) * ANYONESIDE;			
+		
+		return factorRerolls(prob,onFailureRR,onSuccessRR);
+	}
 
-	private double calcArmorSave(int armor,int weaponAP,boolean onFailureRR,boolean onSuccessRR) {
-		if(weaponAP <= armor && weaponAP != -1) return ONE;
+	private double calcArmorSave(int armor,int weaponAP,boolean onFailureRR,boolean onSuccessRR,boolean armorIgnored) {
+		if((weaponAP <= armor && weaponAP != -1) || armorIgnored) return ONE;
 
-		double prob = (DICEINVERSION - armor) * ANYONESIDE;			
+		double prob = ONE - ((DICEINVERSION - armor) * ANYONESIDE);			
 		return factorRerolls(prob,onFailureRR,onSuccessRR);
 	}
 	
 	private double calcInvSave(int inv,boolean onFailureRR,boolean onSuccessRR) {
 		if(inv == -1) return ONE;
 		
-		double prob = (DICEINVERSION - inv) * ANYONESIDE;	
+		double prob = ONE - ((DICEINVERSION - inv) * ANYONESIDE);	
 		return factorRerolls(prob,onFailureRR,onSuccessRR);
 	}
 	
 	private double calcCover(int cover) { //TODO - make sure that it doesn't need to be inverted
 		if(cover == 0) return ONE;
 		
-		return (DICEINVERSION - cover) * ANYONESIDE;
+		return ONE - ((DICEINVERSION - cover) * ANYONESIDE);
 	}
 	
-	private double calcFNP(boolean fnp,int weaponAP) {
-		if(fnp == false || (weaponAP < 3 && weaponAP != -1)) return ONE;		
+	private double calcFNP(boolean fnp,int weaponAP,boolean armorIgnored) {
+		if(fnp == false || (weaponAP < 3 && weaponAP != -1) || armorIgnored) return ONE;
 		return 0.5;		
 	}
 	
@@ -190,7 +261,7 @@ public class FKMath {
 		// We want the # of combinations for rolling difference 
 		int combinations = outcomes[diff+1][dice];		
 		//Take the # of combinations and multiple it by the chance of getting any acceptable combination
-		return combinations * (ONE/ outcomes[0][dice]);
+		return combinations * (ONE / outcomes[0][dice]);
 	}
 		
 	private double factorRerolls(double prob,boolean onFailureRR,boolean onSuccessRR) {

@@ -3,16 +3,17 @@ package com.mobilebuttes.fortyk.test;
 import com.mobilebuttes.fortyk.FKMath;
 import com.mobilebuttes.fortyk.FKScenario;
 import com.mobilebuttes.fortyk.FKScenarioTarget;
+import com.mobilebuttes.fortyk.FKScenarioType;
 import com.mobilebuttes.fortyk.OutOfAcceptableRange;
 
 class UnitTest {
 	public static void main(String[] args) throws OutOfAcceptableRange {
 		FKMath calc = new FKMath();
 		
-		final int numTests = 20;
+		final int numTests = 32;
 		FKScenario[] scenario = new FKScenario[numTests];
 		double[] expected = new double[numTests];
-		boolean[] passed = new boolean[numTests];				
+		boolean[] passed = new boolean[numTests];
 		
 		// Test 1 - DEFAULT
 		scenario[0] = new FKScenario();
@@ -127,6 +128,69 @@ class UnitTest {
 		scenario[19].setStrength(5);
 		scenario[19].setRending(true);
 		expected[19] = 0.1111111111111111;
+		// Test 21 - CC - Basic
+		scenario[20] = new FKScenario();
+		scenario[20].setType(FKScenarioType.CLOSE_COMBAT);
+		expected[20] = 0.125;
+		// Test 22 - CC - Basic w/ PF
+		scenario[21] = new FKScenario();
+		scenario[21].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[21].setPowerFist(true);
+		expected[21] = 0.41666666666666663;
+		// Test 23 - CC - Basic w/ PF and Inv 3+
+		scenario[22] = new FKScenario();
+		scenario[22].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[22].setPowerFist(true);
+		scenario[22].setInv(3);
+		scenario[22].setFNP(true);
+		expected[22] = 0.1388888888888889;
+		// Test 24 -
+		scenario[23] = new FKScenario();
+		scenario[23].setAP(2);
+		scenario[23].setInv(3);
+		expected[23] = 0.11111111111111112;
+		// Test 25 -
+		scenario[24] = new FKScenario();
+		scenario[24].setAP(2);
+		scenario[24].setCover(4);
+		expected[24] = 0.16666666666666666;
+		// Test 26 -
+		scenario[25] = new FKScenario();
+		scenario[25].setArmor(2);
+		scenario[25].setCover(4);
+		expected[25] = 0.05555555555555558;
+		// Test 27 - CC - Basic w/ WB
+		scenario[26] = new FKScenario();
+		scenario[26].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[26].setWitchBlade(true);
+		expected[26] = 0.20833333333333331;
+		// Test 28 - CC - Basic w/ Poisoned
+		scenario[27] = new FKScenario();
+		scenario[27].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[27].setPoisoned(4);
+		expected[27] = 0.1875;
+		// Test 29 - CC - Poisoned
+		scenario[28] = new FKScenario();
+		scenario[28].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[28].setPoisoned(4);	
+		scenario[28].setToughness(5);
+		expected[28] = 0.125;
+		// Test 30 - CC - Thunderhammer
+		scenario[29] = new FKScenario();
+		scenario[29].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[29].setThunderHammer(true);
+		expected[29] = 0.41666666666666663;
+		// Test 30 - CC - Lighting claws
+		scenario[30] = new FKScenario();
+		scenario[30].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[30].setLightningClaws(true);
+		expected[30] = 0.375;
+		// Test 30 - CC - Lighting claws and inv
+		scenario[31] = new FKScenario();
+		scenario[31].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[31].setLightningClaws(true);
+		scenario[31].setInv(3);
+		expected[31] = 0.125;
 		
 		for(int i = 0;i < scenario.length; i++) {
 			System.out.println();
@@ -140,7 +204,7 @@ class UnitTest {
 				passed[i] = false;
 			}
 			
-			System.out.println((passed[i]) ? " Passed" : "Failed");
+			System.out.println((passed[i]) ? " Passed" : " Failed");
 		}
 		
 		System.out.println("\n");
@@ -152,6 +216,6 @@ class UnitTest {
 		}
 		
 		System.out.println("-----------------");
-		System.out.println((allTestsPassed) ? "ALL TESTS PASSED" : "SOME TESTS FAILED");				
+		System.out.println((allTestsPassed) ? "ALL TESTS PASSED" : "!!!SOME TESTS FAILED!!!");				
 	}
 }

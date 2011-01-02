@@ -3,29 +3,34 @@ package com.mobilebuttes.fortyk;
 public class FKScenario {	
 	private FKScenarioType type = FKScenarioType.SHOOTING;
 	private FKScenarioTarget target = FKScenarioTarget.UNARMORED;
-	
+	// Attacker vars
 	private int bs = 4;
+	private int aWS = 4;
 	private int strength = 4;
 	private int ap = 5;
 	private int attacks = 1;
-	
+	// Target vars
+	private int tWS = 4;
 	private int toughness = 4;
 	private int armor = 4;
 	private int inv = -1;
-	
-	private boolean rending = false;
-	private boolean sniperSetRending = false;
+	private int cover = 0; // TODO - look over this
+	private boolean fnp = false;	
+	private boolean openTopped = false; // TODO - +1 to dmg roll
+	// Weapon attributes
+	private int poisoned = 0; // wound on 4+, str >= t then reroll failed wounds
+	private boolean rending = false; 
 	private boolean sniper = false;
 	private boolean twl = false; 	
 	private boolean ordnance = false;
 	private boolean melta = false;
 	private boolean lance = false;
-	private boolean powerFist = false;
-	
-	private boolean fnp = false;	
-	private int cover = 0;
-	private boolean openTopped = false; // TODO - +1 to dmg roll
-	
+	private boolean lightningClaws = false; // power weapon, reroll failed wounds
+	private boolean powerWeapon = false; // no armor save
+	private boolean powerFist = false; // power weapon, doubles str up to 10	
+	private boolean witchBlade = false; // to wound is +2, against vehicles they are S9
+	private boolean thunderHammer = false; // powerfist  - against vehicles w/o initiative it causes crew shaken
+	// Reroll bools
 	private boolean onHitFailureRR = false;
 	private boolean onHitSuccessRR = false;
 	private boolean onWoundFailureRR = false;
@@ -35,7 +40,7 @@ public class FKScenario {
 	private boolean onInvFailureRR = false;
 	private boolean onInvSuccessRR = false;
 	
-	//Results
+	//Result vars
 	private double probability = 1.0;
 	
 	public FKScenarioType getType() {
@@ -54,13 +59,17 @@ public class FKScenario {
 		return bs;
 	}
 	public void setBS(int bs) throws OutOfAcceptableRange {
-		if(bs > 7 && bs > 1)
+		if(bs > 6 && bs > 1)
 			this.bs = bs;
 		else
 			throw new OutOfAcceptableRange("Ballistic skill out of range");
 	}
 	public int getStrength() {
-		if(sniper && target == FKScenarioTarget.ARMORED) return 3; // BRB p31.2.9 - Sniper 
+		if(sniper && target == FKScenarioTarget.ARMORED && type == FKScenarioType.SHOOTING) return 3; // BRB p31.2.9 - Sniper 
+		if(witchBlade && target == FKScenarioTarget.ARMORED && type == FKScenarioType.CLOSE_COMBAT) return 9; // BRB p42.2.3 - Witchblades
+		if((powerFist || thunderHammer) && type == FKScenarioType.CLOSE_COMBAT) {
+			return (strength * 2 < 10) ? strength * 2 : 10;
+		}
 		
 		return strength;
 	}
@@ -122,16 +131,10 @@ public class FKScenario {
 		this.fnp = fnp;
 	}
 	public boolean isRending() {
+		if(sniper) return true;
 		return rending;
 	}
-	public void setRending(boolean rending) {
-		if(rending && sniperSetRending)
-			sniperSetRending = false;
-		
-		if(!rending && sniper) 
-			sniperSetRending = true;
-			rending = true;
-		
+	public void setRending(boolean rending) {		
 		this.rending = rending;
 	}
 	public boolean isMelta() {
@@ -149,16 +152,7 @@ public class FKScenario {
 	public boolean isSniper() {
 		return sniper;
 	}
-	public void setSniper(boolean sniper) {
-		if(sniper && !rending)
-			rending = true;
-			sniperSetRending = true;
-	
-		if(!sniper && sniperSetRending) {
-			rending = false;
-			sniperSetRending = false;
-		}
-		
+	public void setSniper(boolean sniper) {	
 		this.sniper = sniper;
 	}
 	public int getCover() {
@@ -201,6 +195,7 @@ public class FKScenario {
 		this.onHitSuccessRR = onHitSuccessRR;
 	}
 	public boolean isOnWoundFailureRR() {
+		if(lightningClaws || (poisoned > 0 && strength >= toughness)) return true;		
 		return onWoundFailureRR;
 	}
 	public void setOnWoundFailureRR(boolean onWoundFailureRR) {
@@ -235,7 +230,72 @@ public class FKScenario {
 	}
 	public void setOnInvSuccessRR(boolean onInvSuccessRR) {
 		this.onInvSuccessRR = onInvSuccessRR;
-	}	
+	}
+	public int getAWS() {
+		return aWS;
+	}
+	public void setAWS(int aWS) throws OutOfAcceptableRange {
+		if(aWS < 11 && aWS > 0)
+			this.aWS = aWS;
+		else
+			throw new OutOfAcceptableRange("Attacker WS out of range");
+	}
+	public int getTWS() {
+		return tWS;
+	}
+	public void setTWS(int tWS) throws OutOfAcceptableRange {
+		if(tWS < 11 && tWS > 0)
+			this.tWS = tWS;
+		else
+			throw new OutOfAcceptableRange("Target WS out of range");
+	}
+	public boolean isPowerFist() {
+		return powerFist;
+	}
+	public void setPowerFist(boolean powerFist) {
+		this.powerFist = powerFist;
+	}
+	
+	public boolean isLightningClaws() {
+		return lightningClaws;
+	}
+	public void setLightningClaws(boolean lightningClaws) {
+		this.lightningClaws = lightningClaws;
+	}
+	public boolean isPowerWeapon() {
+		if(lightningClaws || powerFist || thunderHammer || rending) return true;
+		
+		return powerWeapon;
+	}
+	public void setPowerWeapon(boolean powerWeapon) {
+		this.powerWeapon = powerWeapon;
+	}
+	public int getPoisoned() {
+		return poisoned;
+	}
+	public void setPoisoned(int poisoned) throws OutOfAcceptableRange {
+		if(poisoned > -1 && poisoned < 7)	
+			this.poisoned = poisoned;
+		else 
+			throw new OutOfAcceptableRange("Poison out of range");
+	}
+	public boolean isWitchBlade() {
+		return witchBlade;
+	}
+	public void setWitchBlade(boolean witchBlade) {
+		this.witchBlade = witchBlade;
+	}
+	public boolean isThunderHammer() {
+		return thunderHammer;
+	}
+	public void setThunderHammer(boolean thunderHammer) {
+		this.thunderHammer = thunderHammer;
+	}
+	public boolean isArmorIgnored() {
+		if(isPowerWeapon() && target == FKScenarioTarget.UNARMORED && type == FKScenarioType.CLOSE_COMBAT) return true;
+		
+		return false;
+	}
 	
 	public double getProbability() {
 		return probability;
