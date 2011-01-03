@@ -91,7 +91,7 @@ public class FKMath {
 				s.setNoEffectChance(ONE - prob);
 			}			
 		} else  { // TODO Close Combat
-			if(s.getTarget() == FKScenarioTarget.UNARMORED) {
+			if(s.getTarget() == FKScenarioTarget.UNARMORED) { // TODO bug in rending calculation.
 				double hitChance = calcToAssaultHit(s.getAWS(),s.getTWS(),s.isOnHitSuccessRR(),s.isOnHitFailureRR());
 				double toWound = calcToAssaultWound(s.getStrength(),s.getToughness(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR(),s.isRending(),s.isWitchBlade(),s.getPoisoned());				
 				double saveChance = calcArmorSave(s.getArmor(),s.getAP(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR(),s.isArmorIgnored());
@@ -101,14 +101,11 @@ public class FKMath {
 
 				double bestSave = saveChance;
 				if(bestSave > coverChance) bestSave = coverChance;
-				if(bestSave > invChance) bestSave = invChance;
+				if(bestSave > invChance) bestSave = invChance;				
 				
-				prob = hitChance;
-				prob = prob * toWound;
-				prob = prob * bestSave;
-				prob = prob * fnpChance;
+				prob = hitChance * toWound * bestSave * fnpChance;
 				
-				if(s.isRending()) prob = prob + (hitChance * ANYONESIDE * ((coverChance < invChance) ? coverChance : invChance));
+				if(s.isRending()) prob += hitChance * ANYONESIDE * invChance;
 			} else {
 				
 				
@@ -224,12 +221,14 @@ public class FKMath {
 		return factorRerolls(prob,onFailureRR,onSuccessRR);
 	}
 	
-	//s.getStrength(),s.getToughness(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR(),s.isRending(),s.isPowerWeapon(),s.isWitchBlade(),s.getPoisoned()
+	//s.getStrength(),s.getToughness(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR(),s.isRending(),s.isWitchBlade(),s.getPoisoned()
 	private double calcToAssaultWound(int strength,int toughness,boolean onFailureRR,boolean onSuccessRR,boolean rending, boolean witchBlade, int poisoned) {
-		int diff = woundTable[strength-1][toughness-1];
-		if(rending) diff++;		
+		int diff = woundTable[strength-1][toughness-1];				
 		if(poisoned > 0) diff = poisoned;
 		if(witchBlade) diff = 2;
+		
+		if(diff == -1) return ZERO;
+		if(rending) diff++;
 		
 		double prob;
 		if(diff == -1) 

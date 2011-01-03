@@ -275,7 +275,7 @@ public class FKScenario {
 		this.lightningClaws = lightningClaws;
 	}
 	public boolean isPowerWeapon() {
-		if(lightningClaws || powerFist || thunderHammer || rending) return true;
+		if(lightningClaws || powerFist || thunderHammer) return true;
 		
 		return powerWeapon;
 	}
