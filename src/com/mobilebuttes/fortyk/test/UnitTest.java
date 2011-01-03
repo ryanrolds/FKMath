@@ -10,7 +10,7 @@ class UnitTest {
 	public static void main(String[] args) throws OutOfAcceptableRange {
 		FKMath calc = new FKMath();
 		
-		final int numTests = 32;
+		final int numTests = 33;
 		FKScenario[] scenario = new FKScenario[numTests];
 		double[] expected = new double[numTests];
 		boolean[] passed = new boolean[numTests];
@@ -59,138 +59,138 @@ class UnitTest {
 		scenario[9].setRending(true);
 		scenario[9].setToughness(6);
 		expected[9] = 0.1111111111111111;
-		// Test 10 - Bad armor w/ cover
+		// Test 11 - Bad armor w/ cover
 		scenario[10] = new FKScenario();
 		scenario[10].setArmor(6);
 		scenario[10].setCover(4);
 		expected[10] = 0.16666666666666666;
-		// Test 11 - Vehicle - Armor 12 - S4 weapon
+		// Test 12 - Vehicle - Armor 12 - S4 weapon
 		scenario[11] = new FKScenario();
 		scenario[11].setTarget(FKScenarioTarget.ARMORED);
 		scenario[11].setArmor(14);
 		expected[11] = 0.0;
-		// Test 12 - Vehicle - Armor 14 - S 10 weapon
-		scenario[12] = new FKScenario();
-		scenario[12].setTarget(FKScenarioTarget.ARMORED);
-		scenario[12].setArmor(14);
-		scenario[12].setStrength(10);
-		expected[12] = 0.3333333333333333;
 		// Test 13 - Vehicle - Armor 14 - S 10 weapon
 		scenario[12] = new FKScenario();
 		scenario[12].setTarget(FKScenarioTarget.ARMORED);
 		scenario[12].setArmor(14);
 		scenario[12].setStrength(10);
 		expected[12] = 0.3333333333333333;
-		// Test 14 - Vehicle - Armor 14 - S10 weapon
+		// Test 14 - Vehicle - Armor 14 - S 10 weapon
 		scenario[13] = new FKScenario();
 		scenario[13].setTarget(FKScenarioTarget.ARMORED);
-		scenario[13].setArmor(10);
+		scenario[13].setArmor(14);
 		scenario[13].setStrength(10);
-		expected[13] = 0.6666666666666666;
+		expected[13] = 0.3333333333333333;
 		// Test 15 - Vehicle - Armor 14 - S10 weapon
 		scenario[14] = new FKScenario();
 		scenario[14].setTarget(FKScenarioTarget.ARMORED);
-		scenario[14].setArmor(11);
+		scenario[14].setArmor(10);
 		scenario[14].setStrength(10);
-		expected[14] = 0.6666666666666665;
-		// Test 16 - Vehicle - Armor 14 - S10 weapon w/ melta
+		expected[14] = 0.6666666666666666;
+		// Test 16 - Vehicle - Armor 14 - S10 weapon
 		scenario[15] = new FKScenario();
 		scenario[15].setTarget(FKScenarioTarget.ARMORED);
-		scenario[15].setArmor(14);
+		scenario[15].setArmor(11);
 		scenario[15].setStrength(10);
-		scenario[15].setMelta(true);
-		expected[15] = 0.611111111111111;
-		// Test 17 - Vehicle - Armor 14 - S8 weapon w/ melta
+		expected[15] = 0.6666666666666665;
+		// Test 17 - Vehicle - Armor 14 - S10 weapon w/ melta
 		scenario[16] = new FKScenario();
 		scenario[16].setTarget(FKScenarioTarget.ARMORED);
 		scenario[16].setArmor(14);
-		scenario[16].setStrength(8);
+		scenario[16].setStrength(10);
 		scenario[16].setMelta(true);
-		expected[16] = 0.4814814814814814;
-		// Test 18 - Vehicle - Armor 14 - S10 weapon w/ ord
+		expected[16] = 0.611111111111111;
+		// Test 18 - Vehicle - Armor 14 - S8 weapon w/ melta
 		scenario[17] = new FKScenario();
 		scenario[17].setTarget(FKScenarioTarget.ARMORED);
 		scenario[17].setArmor(14);
-		scenario[17].setStrength(10);
-		scenario[17].setOrdnance(true);
-		expected[17] = 0.5;
-		// Test 19 - Vehicle - Armor 14 - S10 weapon /w rending
+		scenario[17].setStrength(8);
+		scenario[17].setMelta(true);
+		expected[17] = 0.4814814814814814;
+		// Test 19 - Vehicle - Armor 14 - S10 weapon w/ ord
 		scenario[18] = new FKScenario();
 		scenario[18].setTarget(FKScenarioTarget.ARMORED);
 		scenario[18].setArmor(14);
 		scenario[18].setStrength(10);
-		scenario[18].setRending(true);
-		expected[18] = 0.3333333333333333;
-		// Test 20 - Vehicle - Armor 12 - S5 weapon /w rending
+		scenario[18].setOrdnance(true);
+		expected[18] = 0.5;
+		// Test 20 - Vehicle - Armor 14 - S10 weapon /w rending
 		scenario[19] = new FKScenario();
 		scenario[19].setTarget(FKScenarioTarget.ARMORED);
-		scenario[19].setArmor(12);
-		scenario[19].setStrength(5);
+		scenario[19].setArmor(14);
+		scenario[19].setStrength(10);
 		scenario[19].setRending(true);
-		expected[19] = 0.1111111111111111;
-		// Test 21 - CC - Basic
+		expected[19] = 0.3333333333333333;
+		// Test 21 - Vehicle - Armor 12 - S5 weapon /w rending
 		scenario[20] = new FKScenario();
-		scenario[20].setType(FKScenarioType.CLOSE_COMBAT);
-		expected[20] = 0.125;
-		// Test 22 - CC - Basic w/ PF
+		scenario[20].setTarget(FKScenarioTarget.ARMORED);
+		scenario[20].setArmor(12);
+		scenario[20].setStrength(5);
+		scenario[20].setRending(true);
+		expected[20] = 0.1111111111111111;
+		// Test 22 - CC - Basic
 		scenario[21] = new FKScenario();
 		scenario[21].setType(FKScenarioType.CLOSE_COMBAT);
-		scenario[21].setPowerFist(true);
-		expected[21] = 0.41666666666666663;
-		// Test 23 - CC - Basic w/ PF and Inv 3+
+		expected[21] = 0.125;
+		// Test 23 - CC - Basic w/ PF
 		scenario[22] = new FKScenario();
 		scenario[22].setType(FKScenarioType.CLOSE_COMBAT);
 		scenario[22].setPowerFist(true);
-		scenario[22].setInv(3);
-		scenario[22].setFNP(true);
-		expected[22] = 0.1388888888888889;
-		// Test 24 -
+		expected[22] = 0.41666666666666663;
+		// Test 24 - CC - Basic w/ PF and Inv 3+
 		scenario[23] = new FKScenario();
-		scenario[23].setAP(2);
+		scenario[23].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[23].setPowerFist(true);
 		scenario[23].setInv(3);
-		expected[23] = 0.11111111111111112;
+		scenario[23].setFNP(true);
+		expected[23] = 0.1388888888888889;
 		// Test 25 -
 		scenario[24] = new FKScenario();
 		scenario[24].setAP(2);
-		scenario[24].setCover(4);
-		expected[24] = 0.16666666666666666;
+		scenario[24].setInv(3);
+		expected[24] = 0.11111111111111112;
 		// Test 26 -
 		scenario[25] = new FKScenario();
-		scenario[25].setArmor(2);
+		scenario[25].setAP(2);
 		scenario[25].setCover(4);
-		expected[25] = 0.05555555555555558;
-		// Test 27 - CC - Basic w/ WB
+		expected[25] = 0.16666666666666666;
+		// Test 27 -
 		scenario[26] = new FKScenario();
-		scenario[26].setType(FKScenarioType.CLOSE_COMBAT);
-		scenario[26].setWitchBlade(true);
-		expected[26] = 0.20833333333333331;
-		// Test 28 - CC - Basic w/ Poisoned
+		scenario[26].setArmor(2);
+		scenario[26].setCover(4);
+		expected[26] = 0.05555555555555558;
+		// Test 28 - CC - Basic w/ WB
 		scenario[27] = new FKScenario();
 		scenario[27].setType(FKScenarioType.CLOSE_COMBAT);
-		scenario[27].setPoisoned(4);
-		expected[27] = 0.1875;
-		// Test 29 - CC - Poisoned
+		scenario[27].setWitchBlade(true);
+		expected[27] = 0.20833333333333331;
+		// Test 29 - CC - Basic w/ Poisoned
 		scenario[28] = new FKScenario();
 		scenario[28].setType(FKScenarioType.CLOSE_COMBAT);
-		scenario[28].setPoisoned(4);	
-		scenario[28].setToughness(5);
-		expected[28] = 0.125;
-		// Test 30 - CC - Thunderhammer
+		scenario[28].setPoisoned(4);
+		expected[28] = 0.1875;
+		// Test 30 - CC - Poisoned
 		scenario[29] = new FKScenario();
 		scenario[29].setType(FKScenarioType.CLOSE_COMBAT);
-		scenario[29].setThunderHammer(true);
-		expected[29] = 0.41666666666666663;
-		// Test 30 - CC - Lighting claws
+		scenario[29].setPoisoned(4);	
+		scenario[29].setToughness(5);
+		expected[29] = 0.125;
+		// Test 31 - CC - Thunderhammer
 		scenario[30] = new FKScenario();
 		scenario[30].setType(FKScenarioType.CLOSE_COMBAT);
-		scenario[30].setLightningClaws(true);
-		expected[30] = 0.375;
-		// Test 30 - CC - Lighting claws and inv
+		scenario[30].setThunderHammer(true);
+		expected[30] = 0.41666666666666663;
+		// Test 32 - CC - Lighting claws
 		scenario[31] = new FKScenario();
 		scenario[31].setType(FKScenarioType.CLOSE_COMBAT);
 		scenario[31].setLightningClaws(true);
-		scenario[31].setInv(3);
-		expected[31] = 0.125;
+		expected[31] = 0.375;
+		// Test 33 - CC - Lighting claws and inv
+		scenario[32] = new FKScenario();
+		scenario[32].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[32].setLightningClaws(true);
+		scenario[32].setInv(3);
+		expected[32] = 0.125;
 		
 		for(int i = 0;i < scenario.length; i++) {
 			System.out.println();

@@ -18,4 +18,8 @@ public class OutOfAcceptableRange extends Exception {
 		super(arg0);
 		mistake = arg0;
 	}
+	
+	public String getMessage() {
+		return mistake;		
+	}
 }

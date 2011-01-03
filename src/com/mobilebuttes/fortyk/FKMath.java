@@ -72,29 +72,23 @@ public class FKMath {
 				double invChance = calcInvSave(s.getInv(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR());
 				double fnpChance = calcFNP(s.isFNP(),s.getAP(),s.isArmorIgnored());
 				
-				System.out.println("Hit: "+hitChance);
-				System.out.println("Wound: "+toWound);
-				System.out.println("Save: "+saveChance);
-				System.out.println("Cover: "+coverChance);
-				System.out.println("Inv: "+invChance);
-				System.out.println("FNP: "+fnpChance);
-				
 				double bestSave = saveChance;
 				if(bestSave > coverChance) bestSave = coverChance;
 				if(bestSave > invChance) bestSave = invChance;
 				
-				prob = hitChance;
-				prob = prob * toWound;
-				prob = prob * bestSave;
-				prob = prob * fnpChance;
+				prob = hitChance * toWound * bestSave * fnpChance;
 				
 				if(s.isRending()) prob = prob + (hitChance * ANYONESIDE * ((coverChance < invChance) ? coverChance : invChance));			
 			} else {			
-				double glanceChance = calcToGlance(s.getStrength(),s.getArmor(),s.isMelta(),s.isOrdnance(),s.isRending());
-				double penChance = calcToPen(s.getStrength(),s.getArmor(),s.isMelta(),s.isOrdnance(),s.isRending());
+				double glanceChance = calcToGlance(s.getStrength(),s.getArmor(),s.isMelta(),s.isOrdnance(),s.isRending(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR());
+				double penChance = calcToPen(s.getStrength(),s.getArmor(),s.isMelta(),s.isOrdnance(),s.isRending(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR());
 				double coverChance = calcCover(s.getCover());
-			
-				prob = hitChance * (glanceChance + penChance) * coverChance;				
+				
+		    	processVehicleDamage(s,hitChance*glanceChance*coverChance,true);
+		    	processVehicleDamage(s,hitChance*penChance*coverChance,false);		
+		    	
+				prob = hitChance * (glanceChance + penChance) * coverChance;	
+				s.setNoEffectChance(ONE - prob);
 			}			
 		} else  { // TODO Close Combat
 			if(s.getTarget() == FKScenarioTarget.UNARMORED) {
@@ -104,14 +98,7 @@ public class FKMath {
 				double coverChance = calcCover(s.getCover());
 				double invChance = calcInvSave(s.getInv(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR());
 				double fnpChance = calcFNP(s.isFNP(),s.getAP(),s.isArmorIgnored());
-				
-				System.out.println("Hit: "+hitChance);
-				System.out.println("Wound: "+toWound);
-				System.out.println("Save: "+saveChance);
-				System.out.println("Cover: "+coverChance);
-				System.out.println("Inv: "+invChance);
-				System.out.println("FNP: "+fnpChance);
-				
+
 				double bestSave = saveChance;
 				if(bestSave > coverChance) bestSave = coverChance;
 				if(bestSave > invChance) bestSave = invChance;
@@ -129,6 +116,79 @@ public class FKMath {
 		}
 		
 		s.setProbability(prob);
+	}
+	
+	private void processVehicleDamage(FKScenario s,double chance,boolean glancing) {
+    	int shift = 0;  
+    	double sixth = chance / 6.0;    	
+    	
+    	if(glancing) shift -= 2; // Glancing hits are -2 to v.damage
+    	if(s.isOpenTopped()) shift += 2; // Open topped is +2 to v. damage     	
+    	if(s.getAP() == 1) // AP1 is +1 to v. damage
+    		shift++;
+    	else if(s.getAP() < 1) // AP- is -1 to v. damage
+    		shift--;    	  	
+		
+    	switch(shift) { // TODO I want to make this cleaner
+			case 5:    	
+				s.setExplodeChance(s.getExplodeChance() + (6.0 * sixth));
+				break;
+			case 4:    	
+				s.setWreakedChance(s.getWreakedChance() + sixth);
+				s.setExplodeChance(s.getExplodeChance() + (5.0 * sixth));
+				break;
+			case 3:    	
+				s.setImmobileChance(s.getImmobileChance() + sixth);
+				s.setWreakedChance(s.getWreakedChance() + sixth);
+				s.setExplodeChance(s.getExplodeChance() + (4.0 * sixth));
+				break;
+			case 2:			
+				s.setWeaponDestroyedChance(s.getWeaponDestroyedChance() + sixth);
+				s.setImmobileChance(s.getImmobileChance() + sixth);
+				s.setWreakedChance(s.getWreakedChance() + sixth);
+				s.setExplodeChance(s.getExplodeChance() + (3.0 * sixth));
+				break;
+			case 1:    	
+				s.setStunnedChance(s.getStunnedChance() + sixth);
+				s.setWeaponDestroyedChance(s.getWeaponDestroyedChance() + sixth);
+				s.setImmobileChance(s.getImmobileChance() + sixth);
+				s.setWreakedChance(s.getWreakedChance() + sixth);
+				s.setExplodeChance(s.getExplodeChance() + (2.0 * sixth));
+				break;
+			case -1:
+				s.setShakenChance(s.getShakenChance() + (2.0 * sixth));
+				s.setStunnedChance(s.getStunnedChance() + sixth);
+				s.setWeaponDestroyedChance(s.getWeaponDestroyedChance() + sixth);
+				s.setImmobileChance(s.getImmobileChance() + sixth);
+				s.setWreakedChance(s.getWreakedChance() + sixth);
+				break;
+			case -2:
+				s.setShakenChance(s.getShakenChance() + (3.0 * sixth));
+				s.setStunnedChance(s.getStunnedChance() + sixth);
+				s.setWeaponDestroyedChance(s.getWeaponDestroyedChance() + sixth);
+				s.setImmobileChance(s.getImmobileChance() + sixth);
+				break;
+			case -3:
+				s.setShakenChance(s.getShakenChance() + (4.0 * sixth));
+				s.setStunnedChance(s.getStunnedChance() + sixth);
+				s.setWeaponDestroyedChance(s.getWeaponDestroyedChance() + sixth);
+				break;
+			case -4:
+				s.setShakenChance(s.getShakenChance() + (5.0 * sixth));
+				s.setStunnedChance(s.getStunnedChance() + sixth);
+				break;
+			case -5:
+				s.setShakenChance(s.getShakenChance() + (6.0 * sixth));
+				break;
+			case 0:
+			default:
+				s.setShakenChance(s.getShakenChance() + sixth);
+				s.setStunnedChance(s.getStunnedChance() + sixth);
+				s.setWeaponDestroyedChance(s.getWeaponDestroyedChance() + sixth);
+				s.setImmobileChance(s.getImmobileChance() + sixth);
+				s.setWreakedChance(s.getWreakedChance() + sixth);
+				s.setExplodeChance(s.getExplodeChance() + sixth);  
+    	}
 	}
 	
 //	private double getNumberOfWounds(int attacks,double prob) {
@@ -181,14 +241,15 @@ public class FKMath {
 	}
 
 	private double calcArmorSave(int armor,int weaponAP,boolean onFailureRR,boolean onSuccessRR,boolean armorIgnored) {
-		if((weaponAP <= armor && weaponAP != -1) || armorIgnored) return ONE;
+		if((weaponAP > 0 && weaponAP <= armor) || armor < 2 || armorIgnored) return ONE;
 
 		double prob = ONE - ((DICEINVERSION - armor) * ANYONESIDE);			
 		return factorRerolls(prob,onFailureRR,onSuccessRR);
 	}
 	
 	private double calcInvSave(int inv,boolean onFailureRR,boolean onSuccessRR) {
-		if(inv == -1) return ONE;
+		if(inv <= 1) return ONE;
+		if(inv > 6) return ONE;
 		
 		double prob = ONE - ((DICEINVERSION - inv) * ANYONESIDE);	
 		return factorRerolls(prob,onFailureRR,onSuccessRR);
@@ -201,11 +262,11 @@ public class FKMath {
 	}
 	
 	private double calcFNP(boolean fnp,int weaponAP,boolean armorIgnored) {
-		if(fnp == false || (weaponAP < 3 && weaponAP != -1) || armorIgnored) return ONE;
-		return 0.5;		
+		if(fnp == false || (weaponAP >= 1 && weaponAP <= 2) || armorIgnored) return ONE;
+		return 0.5;
 	}
 	
-	private double calcToGlance(int str,int armor,boolean melta,boolean ord,boolean rending) {
+	private double calcToGlance(int str,int armor,boolean melta,boolean ord,boolean rending,boolean onFailureRR,boolean onSuccessRR) {
 		int diff = armor - str;
 		int dice = 0; // This is for the outcome table, index 0 is one dice, index 2 is two dice
 		
@@ -214,27 +275,27 @@ public class FKMath {
 		if(diff < (dice + 1)) return ZERO; // If you can't roll the exact number needed then it will always be a pen hit.
 		
 		// If the difference is larger when what be rolled it will always fail
-		if(diff > 12 || (diff > 9 && !melta) || (diff > 6 && !rending)) return ZERO;
+		if(diff > 12 || (diff > 9 && !melta) || (diff > 6 && !rending && !melta)) return ZERO;
 			
 		if(!melta && rending && diff > 6) { 
-			return ANYONESIDE * (ANYONESIDE * 2.0); // For getting a 6 then getting 1-3 on the d3
+			return factorRerolls((ANYONESIDE * (ANYONESIDE * 2.0)),onFailureRR,onSuccessRR); // For getting a 6 then getting 1-3 on the d3
 		} 	
 		
 		if(ord && !melta) {
 			// Get the combination the 2d6 pick highest table;
 			int combinations = twoDHighest[diff][0];
 			// Use the combination to work out the odd of getting a glance
-			return combinations * (ONE / twoDHighest[0][0]);
+			return factorRerolls((combinations * (ONE / twoDHighest[0][0])),onFailureRR,onSuccessRR);
 		} 
 		
 		// We want the # of combinations for rolling difference 
 		int combinations = outcomes[diff][dice] - outcomes[diff+1][dice];
 		
 		//Take the # of combinations and multiple it by the chance of getting one combinations
-		return combinations * (ONE / outcomes[0][dice]);
+		return factorRerolls((combinations * (ONE / outcomes[0][dice])),onFailureRR,onSuccessRR);
 	}
 	
-	private double calcToPen(int str,int armor,boolean melta,boolean ord,boolean rending) {
+	private double calcToPen(int str,int armor,boolean melta,boolean ord,boolean rending,boolean onFailureRR,boolean onSuccessRR) {
 		int diff = armor - str;
 		int dice = 0; // This is for the outcome table, index 0 is one dice, index 2 is two dice
 		
@@ -243,25 +304,25 @@ public class FKMath {
 		if(diff < (dice + 1)) return ONE; // If you can't roll the exact number needed then it will always be a pen hit.
 		
 		// If the difference is larger when what be rolled it will always fail
-		if(diff > 12 || (diff > 9 && !melta) || (diff > 6 && !rending)) return ZERO;			
+		if(diff > 12 || (diff > 9 && !melta) || (diff > 6 && !rending && !melta)) return ZERO;			
 		
 		if(!melta && rending && diff >= 6) { 
 			int inverse = 4 - ((diff - 6) + 1);			
 			if(inverse < 1) return ZERO;			
-			return ANYONESIDE * (inverse * (ANYONESIDE * 2.0)); // For getting a 6 then getting 1-3 on the d3
+			return factorRerolls((ANYONESIDE * (inverse * (ANYONESIDE * 2.0))),onFailureRR,onSuccessRR); // For getting a 6 then getting 1-3 on the d3
 		}
 		
 		if(ord && !melta) {
 			// Get the combination the 2d6 pick highest table;
 			int combinations = twoDHighest[diff+1][1];
 			// Use the combination to work out the odd of getting a pen
-			return combinations * (ONE / twoDHighest[0][1]);
+			return factorRerolls((combinations * (ONE / twoDHighest[0][1])),onFailureRR,onSuccessRR);
 		} 
 		
 		// We want the # of combinations for rolling difference 
 		int combinations = outcomes[diff+1][dice];		
 		//Take the # of combinations and multiple it by the chance of getting any acceptable combination
-		return combinations * (ONE / outcomes[0][dice]);
+		return factorRerolls((combinations * (ONE / outcomes[0][dice])),onFailureRR,onSuccessRR);
 	}
 		
 	private double factorRerolls(double prob,boolean onFailureRR,boolean onSuccessRR) {

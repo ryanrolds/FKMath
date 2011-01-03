@@ -41,7 +41,15 @@ public class FKScenario {
 	private boolean onInvSuccessRR = false;
 	
 	//Result vars
-	private double probability = 1.0;
+	private double probability = 0.0;
+	// Vehicle vars
+	private double noEffectChance = 0.0;
+	private double shakenChance = 0.0;
+	private double stunnedChance = 0.0;
+	private double weaponDestroyedChance = 0.0;
+	private double immobileChance = 0.0;
+	private double wreakedChance = 0.0;
+	private double explodChance = 0.0;	
 	
 	public FKScenarioType getType() {
 		return type;
@@ -59,7 +67,7 @@ public class FKScenario {
 		return bs;
 	}
 	public void setBS(int bs) throws OutOfAcceptableRange {
-		if(bs > 6 && bs > 1)
+		if(bs <= 5 && bs >= 1)
 			this.bs = bs;
 		else
 			throw new OutOfAcceptableRange("Ballistic skill out of range");
@@ -71,10 +79,11 @@ public class FKScenario {
 			return (strength * 2 < 10) ? strength * 2 : 10;
 		}
 		
+		if(strength < 0) return 0;
 		return strength;
 	}
 	public void setStrength(int strength) throws OutOfAcceptableRange {
-		if(strength < 11 && strength > -4)
+		if(strength <= 10 && strength >= -1)
 			this.strength = strength;
 		else
 			throw new OutOfAcceptableRange("Strength out of range");
@@ -83,7 +92,7 @@ public class FKScenario {
 		return toughness;
 	}
 	public void setToughness(int toughness) throws OutOfAcceptableRange {
-		if(toughness > 0 && toughness < 11)
+		if(toughness >= -1 && toughness <= 10)
 			this.toughness = toughness;
 		else
 			throw new OutOfAcceptableRange("Toughness out of range");
@@ -91,20 +100,22 @@ public class FKScenario {
 	public int getArmor() {
 		if(lance && target == FKScenarioTarget.ARMORED && armor > 12) // BRB p32.2.3 - LANCE
 			return 12;
-			
+		
+		if(armor < 0) return 0;		
 		return armor;
 	}
 	public void setArmor(int armor) throws OutOfAcceptableRange {
-		if(armor > -1 && armor < 15)		
+		if(armor >= -1 && armor <= 14)		
 			this.armor = armor;
 		else
 			throw new OutOfAcceptableRange("Armor out of range");
 	}
 	public int getAP() {
+		if(ap < 0) return 0;		
 		return ap;
 	}
 	public void setAP(int ap) throws OutOfAcceptableRange {
-		if(ap > -1 && ap < 7)	
+		if(ap >= -1 && ap <= 6)	
 			this.ap = ap;
 		else 
 			throw new OutOfAcceptableRange("AP out of range");
@@ -119,10 +130,10 @@ public class FKScenario {
 		return inv;
 	}
 	public void setInv(int inv) throws OutOfAcceptableRange {
-		if(inv > -1 && inv < 7)
+		if(inv >= -1 && inv <= 6)
 			this.inv = inv;
 		else 
-			throw new OutOfAcceptableRange("Inv out of range");
+			throw new OutOfAcceptableRange("Inv out of range ("+inv+")");
 	}
 	public boolean isFNP() {
 		return fnp;
@@ -156,10 +167,11 @@ public class FKScenario {
 		this.sniper = sniper;
 	}
 	public int getCover() {
+		if(cover < 0) return 0;		
 		return cover;
 	}
 	public void setCover(int cover) throws OutOfAcceptableRange {
-		if(cover > -1 && cover < 7)	
+		if(cover >= -1 && cover <= 6)	
 			this.cover = cover;
 		else 
 			throw new OutOfAcceptableRange("Cover out of range");
@@ -235,7 +247,7 @@ public class FKScenario {
 		return aWS;
 	}
 	public void setAWS(int aWS) throws OutOfAcceptableRange {
-		if(aWS < 11 && aWS > 0)
+		if(aWS <= 10 && aWS >= 1)
 			this.aWS = aWS;
 		else
 			throw new OutOfAcceptableRange("Attacker WS out of range");
@@ -244,7 +256,7 @@ public class FKScenario {
 		return tWS;
 	}
 	public void setTWS(int tWS) throws OutOfAcceptableRange {
-		if(tWS < 11 && tWS > 0)
+		if(tWS <= 10 && tWS >= 1)
 			this.tWS = tWS;
 		else
 			throw new OutOfAcceptableRange("Target WS out of range");
@@ -274,7 +286,7 @@ public class FKScenario {
 		return poisoned;
 	}
 	public void setPoisoned(int poisoned) throws OutOfAcceptableRange {
-		if(poisoned > -1 && poisoned < 7)	
+		if(poisoned >= -1 && poisoned <= 6)	
 			this.poisoned = poisoned;
 		else 
 			throw new OutOfAcceptableRange("Poison out of range");
@@ -295,13 +307,63 @@ public class FKScenario {
 		if(isPowerWeapon() && target == FKScenarioTarget.UNARMORED && type == FKScenarioType.CLOSE_COMBAT) return true;
 		
 		return false;
-	}
-	
+	}	
 	public double getProbability() {
 		return probability;
 	}
 	public void setProbability(double probability) {
 		this.probability = probability;
+	}
+	public double getNoEffectChance() {
+		return noEffectChance;
+	}
+	public void setNoEffectChance(double noEffectChance) {
+		this.noEffectChance = noEffectChance;
+	}
+	public double getShakenChance() {
+		return shakenChance;
+	}
+	public void setShakenChance(double shakenChance) {
+		this.shakenChance = shakenChance;
+	}
+	public double getStunnedChance() {
+		return stunnedChance;
+	}
+	public void setStunnedChance(double stunnedChance) {
+		this.stunnedChance = stunnedChance;
+	}
+	public double getWeaponDestroyedChance() {
+		return weaponDestroyedChance;
+	}
+	public void setWeaponDestroyedChance(double weaponDestroyedChance) {
+		this.weaponDestroyedChance = weaponDestroyedChance;
+	}
+	public double getImmobileChance() {
+		return immobileChance;
+	}
+	public void setImmobileChance(double immobileChance) {
+		this.immobileChance = immobileChance;
+	}
+	public double getWreakedChance() {
+		return wreakedChance;
+	}
+	public void setWreakedChance(double wreakedChance) {
+		this.wreakedChance = wreakedChance;
+	}
+	public double getExplodeChance() {
+		return explodChance;
+	}
+	public void setExplodeChance(double explodChance) {
+		this.explodChance = explodChance;
+	}
+	public void resetVehicleDamage() {
+		noEffectChance = 0.0;
+		shakenChance = 0.0;
+		stunnedChance = 0.0;
+		weaponDestroyedChance = 0.0;
+		immobileChance = 0.0;
+		wreakedChance = 0.0;
+		explodChance = 0.0;		
 	}
 }
 
