@@ -10,7 +10,7 @@ class UnitTest {
 	public static void main(String[] args) throws OutOfAcceptableRange {
 		FKMath calc = new FKMath();
 		
-		final int numTests = 33;
+		final int numTests = 39;
 		FKScenario[] scenario = new FKScenario[numTests];
 		double[] expected = new double[numTests];
 		boolean[] passed = new boolean[numTests];
@@ -191,6 +191,39 @@ class UnitTest {
 		scenario[32].setLightningClaws(true);
 		scenario[32].setInv(3);
 		expected[32] = 0.125;
+		// Test 34 - More then twice S
+		scenario[33] = new FKScenario();
+		scenario[33].setType(FKScenarioType.SHOOTING);
+		scenario[33].setToughness(10);
+		expected[33] = 0.0;
+		// Test 35 - More then twice S w/ rending
+		scenario[34] = new FKScenario();
+		scenario[34].setType(FKScenarioType.SHOOTING);
+		scenario[34].setToughness(10);
+		scenario[34].setRending(true);
+		expected[34] = 0.1111111111111111;
+		// Test 36 - More then twice S w/ rending
+		scenario[35] = new FKScenario();
+		scenario[35].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[35].setToughness(10);
+		expected[35] = 0.0;
+		// Test 37 - More then twice S w/ rending
+		scenario[36] = new FKScenario();
+		scenario[36].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[36].setToughness(10);
+		scenario[36].setRending(true);
+		expected[36] = 0.08333333333333333;
+		// Test 38 - Sniper
+		scenario[37] = new FKScenario();
+		scenario[37].setToughness(10);
+		scenario[37].setSniper(true);
+		expected[37] = 0.2222222222222222;
+		// Test 39 - T10 CC test
+		scenario[38] = new FKScenario();
+		scenario[38].setType(FKScenarioType.CLOSE_COMBAT);
+		scenario[38].setToughness(10);
+		expected[38] = 0.0;
+
 		
 		for(int i = 0;i < scenario.length; i++) {
 			System.out.println();

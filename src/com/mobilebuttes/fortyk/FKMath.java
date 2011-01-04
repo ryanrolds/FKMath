@@ -2,7 +2,6 @@ package com.mobilebuttes.fortyk;
 
 public class FKMath {
 	final private double ANYONESIDE = (1.0 / 6);
-	final private int TOHITCONVERSION = 7;
 	final private int DICEINVERSION = 7;
 	final private double ONE = 1.0;
 	final private double FACTORTWO = 2.0;
@@ -98,7 +97,7 @@ public class FKMath {
 				double coverChance = calcCover(s.getCover());
 				double invChance = calcInvSave(s.getInv(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR());
 				double fnpChance = calcFNP(s.isFNP(),s.getAP(),s.isArmorIgnored());
-
+				
 				double bestSave = saveChance;
 				if(bestSave > coverChance) bestSave = coverChance;
 				if(bestSave > invChance) bestSave = invChance;				
@@ -106,8 +105,7 @@ public class FKMath {
 				prob = hitChance * toWound * bestSave * fnpChance;
 				
 				if(s.isRending()) prob += hitChance * ANYONESIDE * invChance;
-			} else {
-				
+			} else {	
 				
 			}
 		}
@@ -187,14 +185,9 @@ public class FKMath {
 				s.setExplodeChance(s.getExplodeChance() + sixth);  
     	}
 	}
-	
-//	private double getNumberOfWounds(int attacks,double prob) {
-//		double wounds = attacks * prob;	
-//		return wounds;
-//	}
 
 	private double calcToHit(int bs,boolean twinLinked,boolean onFailureRR,boolean onSuccessRR) {
-		double prob = (DICEINVERSION - (TOHITCONVERSION - bs)) * ANYONESIDE;	
+		double prob = bs * ANYONESIDE;
     	if(twinLinked) prob = (ONE - Math.pow((ONE - prob),FACTORTWO));
     	
     	return factorRerolls(prob,onFailureRR,onSuccessRR);
@@ -209,8 +202,12 @@ public class FKMath {
 
 	private double calcToWound(int strength,int toughness,boolean onFailureRR,boolean onSuccessRR,boolean rending,boolean sniper) {
 		int diff = woundTable[strength-1][toughness-1];
+		
+		if(sniper) diff = 4;
+		
+		if(diff == -1) return ZERO;
+		
 		if(rending) diff++;
-		if(sniper) diff = 5;		
 		
 		double prob;
 		if(diff == -1) 
