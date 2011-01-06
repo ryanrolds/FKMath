@@ -67,7 +67,7 @@ public class FKScenario {
 		return bs;
 	}
 	public void setBS(int bs) throws OutOfAcceptableRange {
-		if(bs <= 5 && bs >= 1)
+		if(bs <= 6 && bs >= 1)
 			this.bs = bs;
 		else
 			throw new OutOfAcceptableRange("Ballistic skill out of range");
