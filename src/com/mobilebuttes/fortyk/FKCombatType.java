@@ -1,6 +1,6 @@
 package com.mobilebuttes.fortyk;
 
-public enum FKScenarioType {
+public enum FKCombatType {
 	SHOOTING,
 	CLOSE_COMBAT
 }
