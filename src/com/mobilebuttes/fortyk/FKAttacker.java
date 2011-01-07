@@ -20,9 +20,9 @@ public class FKAttacker extends FKUnit {
 	private boolean thunderHammer = false; // powerfist  - against vehicles w/o initiative it causes crew shaken
 
 
-	public int getStrength(FKTargetType target,FKCombatType type) {
-		if(sniper && target == FKTargetType.ARMORED && type == FKCombatType.SHOOTING) return 3; // BRB p31.2.9 - Sniper 
-		if(witchBlade && target == FKTargetType.ARMORED && type == FKCombatType.CLOSE_COMBAT) return 9; // BRB p42.2.3 - Witchblades
+	public int getStrength(FKUnitType target,FKCombatType type) {
+		if(sniper && target == FKUnitType.ARMORED && type == FKCombatType.SHOOTING) return 3; // BRB p31.2.9 - Sniper 
+		if(witchBlade && target == FKUnitType.ARMORED && type == FKCombatType.CLOSE_COMBAT) return 9; // BRB p42.2.3 - Witchblades
 		if((powerFist || thunderHammer) && type == FKCombatType.CLOSE_COMBAT) {
 			return (strength * 2 < 10) ? strength * 2 : 10;
 		}
@@ -131,8 +131,8 @@ public class FKAttacker extends FKUnit {
 	public void setThunderHammer(boolean thunderHammer) {
 		this.thunderHammer = thunderHammer;
 	}
-	public boolean isArmorIgnored(FKTargetType target,FKCombatType type) {
-		if(isPowerWeapon() && target == FKTargetType.UNARMORED && type == FKCombatType.CLOSE_COMBAT) return true;
+	public boolean isArmorIgnored(FKUnitType target,FKCombatType type) {
+		if(isPowerWeapon() && target == FKUnitType.UNARMORED && type == FKCombatType.CLOSE_COMBAT) return true;
 		
 		return false;
 	}	

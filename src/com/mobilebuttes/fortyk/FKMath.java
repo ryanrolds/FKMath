@@ -60,16 +60,18 @@ public class FKMath {
 	
 	public void processScenario(FKScenario s) {
 		double prob = 1.0;
+		FKAttacker attacker = s.getAttacker();
+		FKUnit target = s.getTarget();
 		
-		if(s.getType() == FKScenarioType.SHOOTING) {
-			double hitChance = calcToHit(s.getBS(),s.isTWL(),s.isOnHitSuccessRR(),s.isOnHitFailureRR());
+		if(s.getCombatType() == FKCombatType.SHOOTING) {
+			double hitChance = calcToHit(attacker.getBS(),attacker.isTWL(),target.isOnHitSuccessRR(),attacker.isOnHitFailureRR());
 			
-			if(s.getTarget() == FKScenarioTarget.UNARMORED) {
-				double toWound = calcToWound(s.getStrength(),s.getToughness(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR(),s.isRending(),s.isSniper());
-				double saveChance = calcArmorSave(s.getArmor(),s.getAP(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR(),s.isArmorIgnored());
-				double coverChance = calcCover(s.getCover());
-				double invChance = calcInvSave(s.getInv(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR());
-				double fnpChance = calcFNP(s.isFNP(),s.getAP(),s.isArmorIgnored());
+			if(target.getType() == FKUnitType.UNARMORED) {
+				double toWound = calcToWound(attacker.getStrength(target.getType(),s.getCombatType()),target.getToughness(),target.isOnWoundSuccessRR(),attacker.isOnWoundFailureRR(target.getToughness()),attacker.isRending(),attacker.isSniper());
+				double saveChance = calcArmorSave(target.getArmor(attacker.isLance()),attacker.getAP(),target.isOnSaveSuccessRR(),attacker.isOnSaveFailureRR(),attacker.isArmorIgnored(target.getType(),s.getCombatType()));
+				double coverChance = calcCover(target.getCover());
+				double invChance = calcInvSave(target.getInv(),target.isOnSaveSuccessRR(),attacker.isOnSaveFailureRR());
+				double fnpChance = calcFNP(target.isFNP(),attacker.getAP(),attacker.isArmorIgnored(target.getType(),s.getCombatType()));
 				
 				double bestSave = saveChance;
 				if(bestSave > coverChance) bestSave = coverChance;
@@ -77,11 +79,11 @@ public class FKMath {
 				
 				prob = hitChance * toWound * bestSave * fnpChance;
 				
-				if(s.isRending()) prob = prob + (hitChance * ANYONESIDE * ((coverChance < invChance) ? coverChance : invChance));			
+				if(attacker.isRending()) prob = prob + (hitChance * ANYONESIDE * ((coverChance < invChance) ? coverChance : invChance));			
 			} else {			
-				double glanceChance = calcToGlance(s.getStrength(),s.getArmor(),s.isMelta(),s.isOrdnance(),s.isRending(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR());
-				double penChance = calcToPen(s.getStrength(),s.getArmor(),s.isMelta(),s.isOrdnance(),s.isRending(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR());
-				double coverChance = calcCover(s.getCover());
+				double glanceChance = calcToGlance(attacker.getStrength(target.getType(),s.getCombatType()),target.getArmor(attacker.isLance()),attacker.isMelta(),attacker.isOrdnance(),attacker.isRending(),target.isOnWoundSuccessRR(),attacker.isOnWoundFailureRR(target.getToughness()));
+				double penChance = calcToPen(attacker.getStrength(target.getType(),s.getCombatType()),target.getArmor(attacker.isLance()),attacker.isMelta(),attacker.isOrdnance(),attacker.isRending(),target.isOnWoundSuccessRR(),attacker.isOnWoundFailureRR(target.getToughness()));
+				double coverChance = calcCover(target.getCover());
 				
 		    	processVehicleDamage(s,hitChance*glanceChance*coverChance,true);
 		    	processVehicleDamage(s,hitChance*penChance*coverChance,false);		
@@ -90,13 +92,13 @@ public class FKMath {
 				s.setNoEffectChance(ONE - prob);
 			}			
 		} else  { // TODO Close Combat
-			if(s.getTarget() == FKScenarioTarget.UNARMORED) { // TODO bug in rending calculation.
-				double hitChance = calcToAssaultHit(s.getAWS(),s.getTWS(),s.isOnHitSuccessRR(),s.isOnHitFailureRR());
-				double toWound = calcToAssaultWound(s.getStrength(),s.getToughness(),s.isOnWoundSuccessRR(),s.isOnWoundFailureRR(),s.isRending(),s.isWitchBlade(),s.getPoisoned());				
-				double saveChance = calcArmorSave(s.getArmor(),s.getAP(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR(),s.isArmorIgnored());
-				double coverChance = calcCover(s.getCover());
-				double invChance = calcInvSave(s.getInv(),s.isOnSaveSuccessRR(),s.isOnSaveFailureRR());
-				double fnpChance = calcFNP(s.isFNP(),s.getAP(),s.isArmorIgnored());
+			if(s.getTarget().getType() == FKUnitType.UNARMORED) { // TODO bug in rending calculation.
+				double hitChance = calcToAssaultHit(attacker.getWS(),target.getWS(),target.isOnHitSuccessRR(),attacker.isOnHitFailureRR());
+				double toWound = calcToAssaultWound(attacker.getStrength(target.getType(),s.getCombatType()),target.getToughness(),target.isOnWoundSuccessRR(),attacker.isOnWoundFailureRR(target.getToughness()),attacker.isRending(),attacker.isWitchBlade(),attacker.getPoisoned());				
+				double saveChance = calcArmorSave(target.getArmor(attacker.isLance()),attacker.getAP(),target.isOnSaveSuccessRR(),attacker.isOnSaveFailureRR(),attacker.isArmorIgnored(target.getType(),s.getCombatType()));
+				double coverChance = calcCover(target.getCover());
+				double invChance = calcInvSave(target.getInv(),target.isOnSaveSuccessRR(),attacker.isOnSaveFailureRR());
+				double fnpChance = calcFNP(target.isFNP(),attacker.getAP(),attacker.isArmorIgnored(target.getType(),s.getCombatType()));
 				
 				double bestSave = saveChance;
 				if(bestSave > coverChance) bestSave = coverChance;
@@ -104,7 +106,7 @@ public class FKMath {
 				
 				prob = hitChance * toWound * bestSave * fnpChance;
 				
-				if(s.isRending()) prob += hitChance * ANYONESIDE * invChance;
+				if(attacker.isRending()) prob += hitChance * ANYONESIDE * invChance;
 			} else {	
 				
 			}
@@ -118,10 +120,10 @@ public class FKMath {
     	double sixth = chance / 6.0;    	
     	
     	if(glancing) shift -= 2; // Glancing hits are -2 to v.damage
-    	if(s.isOpenTopped()) shift += 2; // Open topped is +2 to v. damage     	
-    	if(s.getAP() == 1) // AP1 is +1 to v. damage
+    	if(s.getTarget().isOpenTopped()) shift += 2; // Open topped is +2 to v. damage     	
+    	if(s.getAttacker().getAP() == 1) // AP1 is +1 to v. damage
     		shift++;
-    	else if(s.getAP() < 1) // AP- is -1 to v. damage
+    	else if(s.getAttacker().getAP() < 1) // AP- is -1 to v. damage
     		shift--;    	  	
 		
     	switch(shift) { // TODO I want to make this cleaner

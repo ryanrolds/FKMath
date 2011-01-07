@@ -1,7 +1,7 @@
 package com.mobilebuttes.fortyk;
 
 public class FKUnit {
-	protected FKTargetType type = FKTargetType.UNARMORED;
+	protected FKUnitType type = FKUnitType.UNARMORED;
 	
 	// Target vars
 	protected String name = "Target";
@@ -24,10 +24,10 @@ public class FKUnit {
 	protected boolean onSaveSuccessRR = false;
 	protected boolean onInvSuccessRR = false;
 	
-	public FKTargetType getType() {
+	public FKUnitType getType() {
 		return type;
 	}
-	public void setType(FKTargetType type) {
+	public void setType(FKUnitType type) {
 		this.type = type;
 	}
 	public String getName() {
@@ -54,7 +54,7 @@ public class FKUnit {
 		else
 			throw new OutOfAcceptableRange("Ballistic skill out of range");
 	}
-	public int getStrength(FKTargetType target,FKCombatType type) {		
+	public int getStrength(FKUnitType target,FKCombatType type) {		
 		if(strength < 0) return 0;
 		return strength;
 	}
@@ -67,8 +67,8 @@ public class FKUnit {
 		else
 			throw new OutOfAcceptableRange("Toughness out of range");
 	}
-	public int getArmor(FKTargetType target,boolean lance) {
-		if(lance && target == FKTargetType.ARMORED && armor > 12) // BRB p32.2.3 - LANCE
+	public int getArmor(boolean lance) {
+		if(lance && getType() == FKUnitType.ARMORED && armor > 12) // BRB p32.2.3 - LANCE
 			return 12;
 		
 		if(armor < 0) return 0;		

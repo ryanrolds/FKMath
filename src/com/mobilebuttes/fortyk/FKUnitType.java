@@ -1,6 +1,6 @@
 package com.mobilebuttes.fortyk;
 
-public enum FKTargetType {
+public enum FKUnitType {
 	UNARMORED,
 	ARMORED
 }
