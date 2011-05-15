@@ -1,9 +1,8 @@
 FKMath
-======
+-----------------------
 Java library for creating senarios and calculating wounds
-
 Facilities the basic and advanced Warhammer 40K calculations (mathhammer).
---------------------------------------------------------------------------
+
 
 Important links
 -----------------------
